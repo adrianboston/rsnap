@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- A unique identifier -->
+    <key>Label</key>
+    <string>com.user.rsnap</string>
+
+    <!-- Command to run -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/path/to/rsnap.sh</string>
+        <string>-s</string>
+        <string>/Users/yourname/Documents</string>
+        <string>-d</string>
+        <string>/Volumes/BackupDrive</string>
+    </array>
+
+    <!-- Run once per day at 02:00 AM -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>2</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- Where to log output -->
+    <key>StandardOutPath</key>
+    <string>/Users/yourname/rsnap.stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/yourname/rsnap.stderr.log</string>
+
+    <!-- Keep it alive if it crashes -->
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>
