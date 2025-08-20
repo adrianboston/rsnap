@@ -1,13 +1,16 @@
 #!/bin/zsh
 # Time Machine–style backup script for macOS using rsync + hard links
 
+DRY_RUN=0  # Set to true for testing without actual file changes
+
 # ====== Parse flags ======
-while getopts s:d: flag; do
+while getopts s:d:t flag; do
     case "${flag}" in
         s) SOURCE=${OPTARG};;
         d) DESTINATION=${OPTARG};;
+        t) DRY_RUN=1;;
         *) 
-           echo "Usage: $0 -s <source_path> -d <destination_root>"
+           echo "Usage: $0 -s <source_path> -d <destination_root> [-t]"
            exit 1
            ;;
     esac
@@ -75,6 +78,14 @@ mkdir -p "$DEST"
 CMD="rsync $OPTIONS $LINKDEST \"$SOURCE/\" \"$DEST/\""
 
 echo "Running command: $CMD" >> "$LOGFILE"
+
+# If DRY_RUN is set, just print the command instead of executing it
+if [ $DRY_RUN -eq 1 ]; then
+  echo "DRY RUN: $CMD"
+  echo "Backup would have been created at $DEST"
+  exit 0
+fi
+
 
 eval $CMD >> "$LOGFILE" 2>&1 &
 RSYNC_PID=$!
