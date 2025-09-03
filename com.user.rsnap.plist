@@ -9,12 +9,31 @@
     <!-- Command to run -->
     <key>ProgramArguments</key>
     <array>
-        <string>/path/to/rsnap.sh</string>
+        <string>/usr/local/bin/rsnap.sh</string>
         <string>-s</string>
         <string>/Users/yourname/Documents</string>
         <string>-d</string>
         <string>/Volumes/BackupDrive</string>
+        <string>-v</string>
+        <string>MyVaultName</string>
+        <string>-f</string>
+        <string>hfs</string>
+        <string>-S</string>
+        <string>-n</string>
+        <string>idle</string>        
     </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/local/bin</string>
+    </dict>    
+
+    <!-- Where to log output -->
+    <key>StandardOutPath</key>
+    <string>/Users/yourname/Library/rsnap.stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/yourname/Library/rsnap.stderr.log</string>
 
     <!-- Run once per day at 02:00 AM -->
     <key>StartCalendarInterval</key>
@@ -24,12 +43,6 @@
         <key>Minute</key>
         <integer>0</integer>
     </dict>
-
-    <!-- Where to log output -->
-    <key>StandardOutPath</key>
-    <string>/Users/yourname/rsnap.stdout.log</string>
-    <key>StandardErrorPath</key>
-    <string>/Users/yourname/rsnap.stderr.log</string>
 
     <!-- Keep it alive if it crashes -->
     <key>RunAtLoad</key>
