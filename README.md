@@ -178,6 +178,15 @@ mkdir -p ~/Library/LaunchAgents
 cp com.user.rsnap.plist ~/Library/LaunchAgents/com.user.rsnap.plist
 ```
 
+You might need to clear any attributes that can be applied, in particular `com.apple.provenance`
+
+```sh
+xattr -l ~/Library/LaunchAgents/com.user.rsnap.plist
+com.apple.provenance
+
+xattr -c ~/Library/LaunchAgents/com.user.rsnap.plist
+```
+
 **Step 2 — Load the agent**
 
 ```sh

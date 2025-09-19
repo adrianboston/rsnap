@@ -1,0 +1,23 @@
+# Linux system directories (should not be backed up directly)
+proc/
+sys/
+dev/
+run/
+mnt/
+media/
+lost+found/
+
+# Temporary files and swap
+tmp/
+var/tmp/
+swapfile
+*.swp
+*.lock
+*.sock
+*~
+*.bak
+
+# Caches
+.cache/
+__pycache__/
+*.pyc

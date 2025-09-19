@@ -1,0 +1,24 @@
+# macOS metadata and system files
+.DS_Store
+.AppleDouble
+.AppleDB
+.AppleDesktop
+.Spotlight-V100
+.Trash
+.Trashes
+.TemporaryItems
+.fseventsd
+.com.apple.timemachine.donotpresent
+.DocumentRevisions-V100
+.PKInstallSandboxManager
+.PKInstallSandboxManager-SystemSoftware
+.VolumeIcon.icns
+.quarantine
+
+# Editor / temporary files
+*.swp
+*.lock
+*.sock
+
+# Chromium/Chrome socket file
+*/SingletonSocket
