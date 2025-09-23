@@ -149,7 +149,7 @@ Options:
 -s <path>       Source folder to back up
 -d <path>       Destination root where snapshots are stored
 -v <name>       Vault name (prefix for snapshot folders)
--e <file>       Exclude file list (passed to rsync --exclude-from)
+-x <file>       Exclude file list (passed to rsync --exclude-from)
 -f <fstype>     Destination filesystem type (apfs|hfs|unix|fat|ntfs)
 -n <level>      Nice level (idle|normal|fast)
 -S              Safe mode: do not follow symlinks
@@ -189,12 +189,12 @@ PRUNE_AFTER=0
 QUIET=0             # quiet mode, minimal output
 
 # ====== Parse flags ======
-while getopts s:d:v:e:f:n:SFAPptqh flag; do
+while getopts s:d:v:x:f:n:SFAPpqth flag; do
     case "${flag}" in
         s) SOURCE=${OPTARG};; # source folder to back up
         d) DESTINATION=${OPTARG};;  # root folder where snapshots are stored
         v) VAULT_NAME=${OPTARG};;  # prefix for snapshot folders       
-        e) EXCLUDES=${OPTARG};; # user-supplied folder/file to exclude
+        x) EXCLUDES=${OPTARG};; # user-supplied folder/file to exclude
         f) DEST_FS_TYPE=${OPTARG};;   # filesystem type
         n) NICE_LEVEL_STRING=${OPTARG};;  # set nice level for rsync process
         S) SAFECOPY=1;;  # safe mode, do not follow symlinks
@@ -438,6 +438,8 @@ fi
 
 # TMP_LOGFILE="$SNAPSHOT_NAME/rsync-stats-$$.log"
 TMP_LOGFILE="/tmp/rsync-stats-$$.log"
+TMP_ERRFILE="/tmp/rsync-errors-$$.log"
+
 
 log "Temporary rsync log will be at $TMP_LOGFILE"
 
@@ -452,11 +454,12 @@ log "=== Backup started at $(date) ===" > "$TMP_LOGFILE"
 # Then apply redirection at execution time
 if [[ -n "$TMP_LOGFILE" ]]; then
 #   MKDIR -p "$(dirname "$TMP_LOGFILE")"
+
   log "Logging rsync output to $TMP_LOGFILE"
 
   log "2. Test log entry at $(date)" >> "$TMP_LOGFILE"
 
-  "${RSYNC_CMD[@]}" >> "$TMP_LOGFILE" 2>&1 &
+  "${RSYNC_CMD[@]}" >> "$TMP_LOGFILE" 2> "$TMP_ERRFILE" &
 else
   "${RSYNC_CMD[@]}" &
 fi
@@ -491,7 +494,7 @@ log "Rsync exit code: $RSYNC_EXIT" >> "$TMP_LOGFILE"
 # -----------------------------------
 # Clean up temporary log file and handle rsync exit status
 # -----------------------------------
-if [[ $RSYNC_EXIT -eq 0 ]]; then
+if [[ $RSYNC_EXIT -eq 0 || $RSYNC_EXIT -eq 23 ]]; then
   log "====== Backup completed succesfully at $(date) ======"
 
     # Rename the snapshot to remove the _partial suffix
@@ -505,7 +508,11 @@ if [[ $RSYNC_EXIT -eq 0 ]]; then
     fi
 
     if [[ -n "$TMP_LOGFILE" && -f "$TMP_LOGFILE" ]]; then
-        mv "$TMP_LOGFILE" "$FINAL_DIR/rsync-log.txt"
+        mv "$TMP_LOGFILE" "$FINAL_DIR/rsync-log.txt" 2>/dev/null
+    fi
+
+    if [[ -n "$TMP_ERRFILE" && -f "$TMP_ERRFILE" ]]; then
+        mv "$TMP_ERRFILE" "$FINAL_DIR/rsync-errors.txt" 2>/dev/null
     fi
 
     # ===== Prune old backups =====
@@ -520,12 +527,15 @@ if [[ $RSYNC_EXIT -eq 0 ]]; then
 else
   err "Backup failed with exit code $RSYNC_EXIT at $(date)"
   err "Incomplete snapshot kept at $DEST"
+
+    if [[ $RSYNC_EXIT -eq 23 ]]; then
+        echo "⚠️ rsync exit code 23: partial transfer due to errors" >>"$LOGFILE"
+        echo "Failed files are listed in: $TMP_ERRFILE"
+    fi
+
 fi
 
-  # Clean up temporary log file
-  if [[ -n "$TMP_LOGFILE" && -f "$TMP_LOGFILE" ]]; then
-    rm -f "$TMP_LOGFILE"
-  fi
+
 
   exit $RSYNC_EXIT
 
